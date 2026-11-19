@@ -50,8 +50,11 @@ export function EventCard({ event }: { event: EventRecord }) {
         </div>
 
         <Link
-          href={`/events/${event.id}`}
-          className={cn(buttonVariants(), "mt-auto w-full justify-center gap-2")}
+          href={`/upcoming-events/${event.id}`}
+          className={cn(
+            buttonVariants(),
+            "mt-auto w-full justify-center gap-2"
+          )}
         >
           View Event
           <ArrowRightIcon aria-hidden="true" className="size-4" />

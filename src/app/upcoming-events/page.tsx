@@ -1,8 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Suspense } from "react"
-import { CalendarSearchIcon, SparklesIcon } from "lucide-react"
-
 import { EventsExplorer } from "@/components/events/EventsExplorer"
 import { EventGridSkeleton } from "@/components/events/EventListSkeleton"
 import {
