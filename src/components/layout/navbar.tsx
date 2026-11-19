@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LogIn } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { cn } from "cn"
 import { BrandLogo, BrandName } from "./brand"
 import { MobileMenu } from "./mobile-menu"
