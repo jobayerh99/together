@@ -103,8 +103,7 @@ export function CreateEventForm() {
         title: "Your event has been created successfully!",
         description: "It will now appear on the Upcoming Events page.",
       })
-      // router.push("/upcoming-events")
-      router.refresh()
+      router.push("/upcoming-events")
     } catch (error) {
       // Form data stays intact so the visitor can review and retry.
       toast.add({

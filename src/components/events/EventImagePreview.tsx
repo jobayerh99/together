@@ -3,14 +3,7 @@
 import { useState } from "react"
 import { ImageOffIcon, ImageIcon } from "lucide-react"
 
-function isHttpUrl(value: string): boolean {
-  try {
-    const parsed = new URL(value)
-    return parsed.protocol === "http:" || parsed.protocol === "https:"
-  } catch {
-    return false
-  }
-}
+import { isHttpUrl } from "@/lib/url"
 
 function Placeholder({
   icon,
