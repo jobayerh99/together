@@ -11,7 +11,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { getSession, isAuthRequired } from "@/lib/auth"
 import { getUpcomingEvents } from "@/services/events"
 
 export const metadata: Metadata = {
@@ -26,13 +25,9 @@ export const metadata: Metadata = {
  * and the session cookie read suspend here instead of blocking the shell.
  */
 async function UpcomingEventsSection() {
-  const [events, session] = await Promise.all([getUpcomingEvents(), getSession()])
+  const events = await getUpcomingEvents()
 
-  // Empty-state CTA: signed-in users may create an event; while auth is
-  // optional (REQUIRE_AUTH off) the same CTA shows for everyone.
-  const canCreateEvent = session !== null || !isAuthRequired()
-
-  return <EventsExplorer events={events} canCreateEvent={canCreateEvent} />
+  return <EventsExplorer events={events} canCreateEvent={false} />
 }
 
 export default function UpcomingEventsPage() {

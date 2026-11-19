@@ -12,7 +12,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { requireSession } from "@/lib/auth"
 
 /**
  * This protected route reads the session cookie at request time so the
@@ -36,10 +35,6 @@ const PARTICIPATION_TIPS = [
 ]
 
 export default async function CreateEventPage() {
-  // Redirects to /login?redirect=%2Fcreate-event when REQUIRE_AUTH is enabled
-  // and no valid session exists.
-  await requireSession("/create-event")
-
   return (
     <div className="mx-auto w-full max-w-[1080px] px-4 py-8 sm:px-6 sm:py-12">
       <Breadcrumb className="mb-6">
