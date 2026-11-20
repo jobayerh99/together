@@ -26,8 +26,9 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { da } from "date-fns/locale";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
-export default function RegisterForm() {
+export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [showPasswordErrors, setShowPasswordErrors] = useState(false);
 
@@ -279,12 +280,12 @@ export default function RegisterForm() {
 
                                 <FieldDescription className="text-center text-sm">
                                     Already have an account?{" "}
-                                    <a
-                                        href="/sign-in"
+                                    <Link
+                                        href="/login"
                                         className="font-semibold text-primary underline-offset-4 hover:underline"
                                     >
                                         Sign in
-                                    </a>
+                                    </Link>
                                 </FieldDescription>
                             </Field>
 
