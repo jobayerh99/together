@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -63,17 +64,25 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
           </Tooltip>
         </TooltipProvider>
         <DropdownMenuContent align="end" sideOffset={8} className="w-60">
-          <DropdownMenuLabel className="flex flex-col gap-0.5">
-            <span className="truncate text-sm font-semibold">
-              {user.name}
-            </span>
-            <span className="truncate text-xs font-normal text-muted-foreground">
-              {user.email}
-            </span>
-          </DropdownMenuLabel>
+          {/* Base UI's GroupLabel requires a Menu.Group ancestor — without it
+              the popup throws "MenuGroupContext is missing" on open. */}
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex flex-col gap-0.5">
+              <span className="truncate text-sm font-semibold">
+                {user.name}
+              </span>
+              <span className="truncate text-xs font-normal text-muted-foreground">
+                {user.email}
+              </span>
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           {protectedNavItems.map(({ href, label, icon: Icon }) => (
-            <DropdownMenuItem key={href} render={<Link href={href} />}>
+            <DropdownMenuItem
+              key={href}
+              nativeButton={false}
+              render={<Link href={href} />}
+            >
               <Icon />
               {label}
             </DropdownMenuItem>
