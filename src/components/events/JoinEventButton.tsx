@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
     CheckCircle2,
     HandHeart,
@@ -10,9 +10,13 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth-client";
+import { EventDetails } from "@/app/upcoming-events/[id]/page";
+import { email } from "zod";
 
 interface JoinEventButtonProps {
     eventId: string;
+    event: EventDetails
 }
 
 const STORAGE_KEY = "together_joined_events";
@@ -38,8 +42,13 @@ function getJoinedEventIds(): string[] {
 }
 
 export default function JoinEventButton({
+    event,
     eventId,
 }: JoinEventButtonProps) {
+
+    const { data: session } = authClient.useSession();
+    const user = session?.user
+
     const [isJoined, setIsJoined] = useState<boolean | null>(null);
 
     // Load joined status after the component mounts.
@@ -49,7 +58,28 @@ export default function JoinEventButton({
         setIsJoined(joinedEvents.includes(eventId));
     }, [eventId]);
 
-    const handleJoinEvent = () => {
+    const handleJoinEvent = async (e) => {
+        e.preventDefault()
+        const data = {
+            userName: user?.name,
+            email: user?.email,
+            image: user?.image,
+            ...event,
+            eventId,
+            joiningData: new Date()
+        }
+
+        const res = await fetch('http://localhost:8000/joined', {
+            method: 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+
+        const joinedRes = await res.json()
+        console.log(joinedRes);
+
         if (isJoined === null || isJoined) return;
 
         try {
@@ -90,30 +120,32 @@ export default function JoinEventButton({
     };
 
     return (
-        <Button
-            
-            type="button"
-            onClick={handleJoinEvent}
-            disabled={isJoined === null || isJoined}
-            className="h-12 w-full gap-2 text-base font-semibold"
-            aria-live="polite"
-        >
-            {isJoined === null ? (
-                <>
-                    <Loader2 className="size-5 animate-spin" />
-                    Checking...
-                </>
-            ) : isJoined ? (
-                <>
-                    <CheckCircle2 className="size-5" />
-                    Joined
-                </>
-            ) : (
-                <>
-                    <HandHeart className="size-5" />
-                    Join Event
-                </>
-            )}
-        </Button>
+        <form onSubmit={handleJoinEvent}>
+            <Button
+
+                type="submit"
+                // onClick={handleJoinEvent}
+                disabled={isJoined === null || isJoined}
+                className="h-12 w-full gap-2 text-base font-semibold"
+                aria-live="polite"
+            >
+                {isJoined === null ? (
+                    <>
+                        <Loader2 className="size-5 animate-spin" />
+                        Checking...
+                    </>
+                ) : isJoined ? (
+                    <>
+                        <CheckCircle2 className="size-5" />
+                        Joined
+                    </>
+                ) : (
+                    <>
+                        <HandHeart className="size-5" />
+                        Join Event
+                    </>
+                )}
+            </Button>
+        </form>
     );
 }

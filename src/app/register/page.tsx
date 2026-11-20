@@ -77,19 +77,26 @@ export default function RegisterPage() {
         });
 
         const formData = new FormData(e.target)
-        const user = Object.fromEntries(formData.entries()) as {name: string, email: string, image: string, password: string}
+        const user = Object.fromEntries(formData.entries()) as { name: string, email: string, image: string, password: string }
 
-        const {data, error} = await authClient.signUp.email({
+        const { data, error } = await authClient.signUp.email({
             ...user
         })
 
-        if(data){
+        if (data) {
             redirect("/")
         }
-        if(error){
+        if (error) {
             console.log(error);
         }
     };
+
+    const handleGoogleSignIn = async () => {
+        const data = await authClient.signIn.social({
+            provider: "google",
+        });
+        console.log(data);
+    }
 
     return (
         <div className={cn("mx-auto flex w-full max-w-xl flex-col gap-6")}>
@@ -218,10 +225,10 @@ export default function RegisterPage() {
 
                                     {/* Uppercase */}
                                     <div className={`flex items-center gap-2 text-xs ${hasUppercase
-                                            ? "text-green-600 dark:text-green-400"
-                                            : showPasswordErrors
-                                                ? "text-destructive"
-                                                : "text-muted-foreground"
+                                        ? "text-green-600 dark:text-green-400"
+                                        : showPasswordErrors
+                                            ? "text-destructive"
+                                            : "text-muted-foreground"
                                         }`}>
                                         {hasUppercase ? (
                                             <CheckCircle2 className="size-4" />
@@ -233,10 +240,10 @@ export default function RegisterPage() {
 
                                     {/* Lowercase */}
                                     <div className={`flex items-center gap-2 text-xs ${hasLowercase
-                                            ? "text-green-600 dark:text-green-400"
-                                            : showPasswordErrors
-                                                ? "text-destructive"
-                                                : "text-muted-foreground"
+                                        ? "text-green-600 dark:text-green-400"
+                                        : showPasswordErrors
+                                            ? "text-destructive"
+                                            : "text-muted-foreground"
                                         }`}>
                                         {hasLowercase ? (
                                             <CheckCircle2 className="size-4" />
@@ -248,10 +255,10 @@ export default function RegisterPage() {
 
                                     {/* Minimum Length */}
                                     <div className={`flex items-center gap-2 text-xs ${hasMinLength
-                                            ? "text-green-600 dark:text-green-400"
-                                            : showPasswordErrors
-                                                ? "text-destructive"
-                                                : "text-muted-foreground"
+                                        ? "text-green-600 dark:text-green-400"
+                                        : showPasswordErrors
+                                            ? "text-destructive"
+                                            : "text-muted-foreground"
                                         }`}>
                                         {hasMinLength ? (
                                             <CheckCircle2 className="size-4" />
@@ -297,6 +304,7 @@ export default function RegisterPage() {
                             {/* Google Login */}
                             <Field>
                                 <Button
+                                    onClick={handleGoogleSignIn}
                                     variant="outline"
                                     type="button"
                                     className="h-11 w-full rounded-lg border-border bg-background font-semibold transition-all hover:border-primary/40 hover:bg-primary/[0.04]"

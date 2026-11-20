@@ -52,6 +52,13 @@ export default function LoginPage() {
         }
     };
 
+    const handleGoogleSignIn = async () => {
+        const data = await authClient.signIn.social({
+            provider: "google",
+        });
+        console.log(data);
+    }
+
     return (
         <div className={cn("mx-auto flex w-full max-w-xl flex-col gap-6")}>
             <Card className="overflow-hidden rounded-2xl border-border bg-card shadow-xl shadow-primary/5">
@@ -164,6 +171,7 @@ export default function LoginPage() {
                             {/* Google Login */}
                             <Field>
                                 <Button
+                                onClick={handleGoogleSignIn}
                                     variant="outline"
                                     type="button"
                                     className="h-11 w-full rounded-lg border-border bg-background font-semibold transition-all hover:border-primary/40 hover:bg-primary/[0.04]"

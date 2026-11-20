@@ -18,8 +18,8 @@ import { Separator } from "@/components/ui/separator";
 
 
 import JoinEventButton from "@/components/events/JoinEventButton";
-
-interface EventDetails {
+ 
+export interface EventDetails {
     _id: string;
     title: string;
     description: string;
@@ -324,7 +324,7 @@ const EventDetailsPage = async ({
                                         </p>
                                     </div>
                                 ) : (
-                                    <JoinEventButton eventId={event._id} />
+                                    <JoinEventButton event={event} eventId={event._id} />
                                 )}
 
                                 <p className="text-center text-xs leading-5 text-muted-foreground">
