@@ -10,6 +10,7 @@ import { type NavbarUser } from "./nav-items"
 import { ThemeToggle } from "./theme-toggle"
 import { UserMenu } from "./user-menu"
 import { buttonVariants } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client"
 
 interface NavbarProps {
   /** Pass the authenticated user (mapped to NavbarUser) once auth exists. */
@@ -52,7 +53,15 @@ function CenterNavLink({
   )
 }
 
-export function Navbar({ user, onLogout }: NavbarProps) {
+export function Navbar() {
+
+  const {data: session} = authClient.useSession()
+  const user = session?.user
+
+  const onLogout = () => {
+    authClient.signOut()
+  }
+
   const pathname = usePathname()
   const isEventsActive =
     pathname === "/upcoming-events" || pathname.startsWith("/upcoming-events/")
