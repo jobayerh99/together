@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, type FormEvent } from "react";
+import React, { useState, type FormEvent } from "react";
 import { CheckCircle2, Circle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -23,11 +23,11 @@ import {
     FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
+import { da } from "date-fns/locale";
+import { redirect } from "next/navigation";
 
-export default function RegisterForm({
-    className,
-    ...props
-}: React.ComponentProps<"div">) {
+export default function RegisterForm() {
     const [password, setPassword] = useState("");
     const [showPasswordErrors, setShowPasswordErrors] = useState(false);
 
@@ -54,8 +54,8 @@ export default function RegisterForm({
     }
 
     // Form submission
-    const handleRegisterSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const handleRegisterSubmit = async (e: React.SubmitEvent<HTMLElement>) => {
+        e.preventDefault();
 
         setShowPasswordErrors(true);
 
@@ -75,17 +75,23 @@ export default function RegisterForm({
             description: "Your password meets all the requirements.",
         });
 
-        // Continue with your Better Auth registration logic here.
+        const formData = new FormData(e.target)
+        const user = Object.fromEntries(formData.entries()) as {name: string, email: string, image: string, password: string}
+
+        const {data, error} = await authClient.signUp.email({
+            ...user
+        })
+
+        if(data){
+            redirect("/")
+        }
+        if(error){
+            console.log(error);
+        }
     };
 
     return (
-        <div
-            className={cn(
-                "mx-auto flex w-full max-w-xl flex-col gap-6",
-                className
-            )}
-            {...props}
-        >
+        <div className={cn("mx-auto flex w-full max-w-xl flex-col gap-6")}>
             <Card className="overflow-hidden rounded-2xl border-border bg-card shadow-xl shadow-primary/5">
 
                 {/* Card Header */}
@@ -136,6 +142,7 @@ export default function RegisterForm({
                                 <Input
                                     id="name"
                                     type="text"
+                                    name="name"
                                     placeholder="Your Name"
                                     required
                                     className="h-11 rounded-lg bg-background transition-all focus-visible:ring-primary"
@@ -151,6 +158,7 @@ export default function RegisterForm({
                                 <Input
                                     id="email"
                                     type="email"
+                                    name="email"
                                     placeholder="m@example.com"
                                     required
                                     className="h-11 rounded-lg bg-background transition-all focus-visible:ring-primary"
@@ -160,12 +168,13 @@ export default function RegisterForm({
                             {/* Photo URL */}
                             <Field className="gap-2">
                                 <FieldLabel htmlFor="image" className="font-semibold">
-                                    Photo URL
+                                    Image URL
                                 </FieldLabel>
 
                                 <Input
                                     id="image"
-                                    type="text"
+                                    type="url"
+                                    name="image"
                                     placeholder="https://yourimage.com"
                                     required
                                     className="h-11 rounded-lg bg-background transition-all focus-visible:ring-primary"
@@ -190,6 +199,7 @@ export default function RegisterForm({
                                 <Input
                                     id="password"
                                     type="password"
+                                    name="password"
                                     placeholder="Create a password"
                                     value={password}
                                     onChange={(event) => setPassword(event.target.value)}
