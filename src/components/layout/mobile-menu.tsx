@@ -104,12 +104,12 @@ export function MobileMenu({ user, onLogout, className }: MobileMenuProps) {
           ))}
           {user
             ? protectedNavItems.map((item) => (
-                <SheetNavLink
-                  key={item.href}
-                  item={item}
-                  active={pathname === item.href}
-                />
-              ))
+              <SheetNavLink
+                key={item.href}
+                item={item}
+                active={pathname === item.href}
+              />
+            ))
             : null}
         </nav>
 
@@ -144,6 +144,7 @@ export function MobileMenu({ user, onLogout, className }: MobileMenuProps) {
             </>
           ) : (
             <SheetClose
+              nativeButton={false}
               render={
                 <Link
                   href="/login"

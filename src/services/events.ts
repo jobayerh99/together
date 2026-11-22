@@ -1,4 +1,6 @@
+
 import type { CreateEventValues } from "@/lib/event-schema"
+
 
 /**
  * Events API service — the single place where backend URLs, request payloads,
@@ -53,9 +55,14 @@ function toIsoDate(value: string): string {
  * `eventDate`. Throws {@link EventsApiError} with a human-readable message on
  * failure — callers must never treat a failure as a success.
  */
+
+
+
 export async function createEvent(payload: CreateEventValues): Promise<unknown> {
+
+  
+
   const body = {
-    title: payload.title,
     description: payload.description,
     eventType: payload.eventType,
     thumbnailUrl: payload.thumbnailUrl,
