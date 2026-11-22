@@ -324,7 +324,7 @@ const EventDetailsPage = async ({
                                         </p>
                                     </div>
                                 ) : (
-                                    <JoinEventButton event={event} eventId={event._id} />
+                                    <JoinEventButton event={event} />
                                 )}
 
                                 <p className="text-center text-xs leading-5 text-muted-foreground">

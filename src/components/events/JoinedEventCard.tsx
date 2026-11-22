@@ -14,6 +14,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { EventImage } from "@/components/events/EventImage";
+import { Router } from "next/router";
+import { reddit } from "better-auth";
+import { redirect } from "next/navigation";
 
 export interface JoinedEvent {
     _id?: string;
@@ -48,6 +51,16 @@ function formatEventDate(date: string): string {
 
 const JoinedEventCard = ({ event }: JoinedEventCardProps) => {
     const [currentTime, setCurrentTime] = useState<number | null>(null);
+
+    console.log(event);
+
+    const handleRemoveEvent = async() => {
+        const res = await fetch(`http://localhost:8000/joinedevents/${event._id}`, {
+            method:'DELETE'
+        })
+        const data = await res.json()
+        redirect('/joined-events')
+    }
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -133,6 +146,7 @@ const JoinedEventCard = ({ event }: JoinedEventCardProps) => {
 
                     {/* Remove Event */}
                     <button
+                        onClick={handleRemoveEvent}
                         type="button"
                         className={`${buttonVariants({
                             variant: "destructive",
