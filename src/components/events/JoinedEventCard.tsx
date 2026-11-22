@@ -14,8 +14,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { EventImage } from "@/components/events/EventImage";
-import { Router } from "next/router";
-import { reddit } from "better-auth";
+import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/toast";
 import { redirect } from "next/navigation";
 
 export interface JoinedEvent {
@@ -52,14 +52,36 @@ function formatEventDate(date: string): string {
 const JoinedEventCard = ({ event }: JoinedEventCardProps) => {
     const [currentTime, setCurrentTime] = useState<number | null>(null);
 
-    console.log(event);
+    const router = useRouter();
 
-    const handleRemoveEvent = async() => {
+    const handleRemoveEvent = async () => {
         const res = await fetch(`http://localhost:8000/joinedevents/${event._id}`, {
-            method:'DELETE'
+            method: 'DELETE'
         })
         const data = await res.json()
-        redirect('/joined-events')
+
+        // Check whether deletion was successful
+        if (
+            !res.ok ||
+            data?.success === false ||
+            data?.deletedCount === 0
+        ) {
+            throw new Error(
+                data?.message || "Failed to remove event"
+            );
+        }
+
+        // Success toast
+        toast.add({
+            type: "success",
+            title: "Event Removed!",
+            description: "The event has been removed from your joined events.",
+        });
+
+        // Refresh after showing toast
+        setTimeout(() => {
+            router.refresh();
+        }, 1200);
     }
 
     useEffect(() => {
