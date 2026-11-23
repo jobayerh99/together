@@ -17,7 +17,7 @@ export interface EventRecord {
     eventDate: string
 }
 
-export const EVENTS_API_BASE = "http://localhost:8000"
+
 
 export function toIsoDate(value: string): string {
     const [year = "0", month = "1", day = "1"] = value.split("-")

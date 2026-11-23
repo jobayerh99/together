@@ -49,7 +49,7 @@ const JoinEventButton = ({
                 setIsChecking(true);
 
                 const res = await fetch(
-                    `http://localhost:8000/joined-events/${encodeURIComponent(user.email)}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/joined-events/${user.email}`,
                     {
                         cache: "no-store",
                     }
@@ -104,7 +104,7 @@ const JoinEventButton = ({
             joiningDate: new Date()
         };
 
-        const res = await fetch('http://localhost:8000/joined', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joined`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

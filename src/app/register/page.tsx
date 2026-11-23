@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { da } from "date-fns/locale";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 

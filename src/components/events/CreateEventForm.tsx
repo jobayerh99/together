@@ -35,7 +35,7 @@ import {
 import { createEvent } from "@/services/events"
 
 import { EventImagePreview } from "./EventImagePreview"
-import { authClient } from "@/lib/auth-client"
+
 import { getTokenFromClient } from "@/lib/getTokenFromClient"
 
 const defaultValues: DefaultValues<CreateEventValues> = {

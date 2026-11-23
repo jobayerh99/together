@@ -28,8 +28,7 @@ export const metadata: Metadata = {
     description: "Manage and explore the community events you have joined.",
 };
 
-// API URL
-const API_URL = "http://localhost:8000";
+
 
 // Normalize joined events from API response.
 function normalizeJoinedEvents(data: unknown): JoinedEvent[] {
@@ -152,7 +151,7 @@ async function JoinedEventsSection() {
         const token = await getTokenFromServer()
 
         const res = await fetch(
-            `${API_URL}/joined-events/${encodeURIComponent(user.email)}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/joined-events/${encodeURIComponent(user.email)}`,
             {
                 cache: "no-store",
                 headers : {

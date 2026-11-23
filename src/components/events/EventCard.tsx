@@ -5,8 +5,17 @@ import { ArrowRightIcon, CalendarDaysIcon, MapPinIcon } from "lucide-react"
 import { EventImage } from "@/components/events/EventImage"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
-import type { EventRecord } from "@/services/events"
 import { cn } from "cn"
+
+type EventRecord = {
+  id: string
+  thumbnailUrl: string
+  title: string
+  eventType: string
+  description?: string | null
+  location?: string | null
+  eventDate: string
+}
 
 /**
  * Event card: 16:9 thumbnail, category badge, description, location/date

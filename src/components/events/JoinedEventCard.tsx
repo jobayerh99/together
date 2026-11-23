@@ -55,7 +55,7 @@ const JoinedEventCard = ({ event }: JoinedEventCardProps) => {
     const router = useRouter();
 
     const handleRemoveEvent = async () => {
-        const res = await fetch(`http://localhost:8000/joinedevents/${event._id}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joinedevents/${event._id}`, {
             method: 'DELETE'
         })
         const data = await res.json()

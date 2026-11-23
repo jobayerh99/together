@@ -38,8 +38,7 @@ interface EventDetailsPageProps {
     }>;
 }
 
-const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 
 const getCurrentTimestamp = () => Date.now();
 
@@ -83,7 +82,7 @@ const EventDetailsPage = async ({
 
     try {
         const response = await fetch(
-            `${API_URL}/upcoming-event/${id}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/upcoming-event/${id}`,
             {
                 cache: "no-store",
                 headers : {

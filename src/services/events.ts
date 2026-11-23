@@ -3,7 +3,7 @@
 import { auth } from "@/lib/auth"
 import type { CreateEventValues } from "@/lib/event-schema"
 import { headers } from "next/headers"
-import { EventRecord, EVENTS_API_BASE, EventsApiError, toIsoDate } from "./events.types"
+import { EventRecord, EventsApiError, toIsoDate } from "./events.types"
 
 export async function createEvent( 
   payload: CreateEventValues,
@@ -32,7 +32,7 @@ export async function createEvent(
 
   let response: Response
   try {
-    response = await fetch(`${EVENTS_API_BASE}/create-event`, {
+    response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/create-event`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +113,7 @@ function normalizeEvent(item: unknown): EventRecord | null {
 export async function getUpcomingEvents(): Promise<EventRecord[]> {
   let response: Response
   try {
-    response = await fetch(`${EVENTS_API_BASE}/upcoming-events`, {
+    response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upcoming-events`, {
       // Events change over time (and past ones must disappear), so never reuse
       // a cached response.
       cache: "no-store",

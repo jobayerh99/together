@@ -148,7 +148,7 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
             const token = await getTokenFromClient()
 
             const res = await fetch(
-                `http://localhost:8000/event/${event._id}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/event/${event._id}`,
                 {
                     method: "PATCH",
                     headers: {
@@ -198,7 +198,7 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
             const token = await getTokenFromClient()
 
             const res = await fetch(
-                `http://localhost:8000/event/${event._id}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/event/${event._id}`,
                 {
                     method: "DELETE",
                     headers: {

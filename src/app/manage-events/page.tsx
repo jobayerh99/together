@@ -15,7 +15,7 @@ import Link from "next/link";
 import ManageEventCard, {
     IManageEvent,
 } from "@/components/events/ManageEventCard";
-import { getTokenFromClient } from "@/lib/getTokenFromClient";
+
 
 // Dynamic content: authentication and API fetching
 const ManageEventsContent = async () => {
@@ -44,11 +44,11 @@ const ManageEventsContent = async () => {
         );
     }
 
-    const token = await getTokenFromClient()
+    
 
     // Fetch user's events
     const res = await fetch(
-        `http://localhost:8000/manage-events/${encodeURIComponent(user.email)}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/manage-events/${encodeURIComponent(user.email)}`,
         {
             cache: "no-store",
         }
