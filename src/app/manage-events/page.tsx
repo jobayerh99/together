@@ -15,6 +15,7 @@ import Link from "next/link";
 import ManageEventCard, {
     IManageEvent,
 } from "@/components/events/ManageEventCard";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 // Dynamic content: authentication and API fetching
 const ManageEventsContent = async () => {
@@ -42,6 +43,8 @@ const ManageEventsContent = async () => {
             </div>
         );
     }
+
+    const token = await getTokenFromClient()
 
     // Fetch user's events
     const res = await fetch(

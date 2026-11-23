@@ -22,6 +22,7 @@ import {
 
 
 import type { IManageEvent } from "./ManageEventCard";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 
 // Only the fields that users are allowed to edit
@@ -144,12 +145,15 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
         try {
             setIsUpdating(true);
 
+            const token = await getTokenFromClient()
+
             const res = await fetch(
                 `http://localhost:8000/event/${event._id}`,
                 {
                     method: "PATCH",
                     headers: {
                         "Content-Type": "application/json",
+                        authorization: `Bearer ${token}`
                     },
                     body: JSON.stringify(updatedData),
                 }
@@ -191,10 +195,15 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
             setIsDeleting(true);
             setDeleteError("");
 
+            const token = await getTokenFromClient()
+
             const res = await fetch(
                 `http://localhost:8000/event/${event._id}`,
                 {
                     method: "DELETE",
+                    headers: {
+                        authorization: `Bearer ${token}`
+                    }
                 }
             );
 

@@ -29,5 +29,5 @@ export async function proxy(request: NextRequest): Promise<NextResponse | undefi
 
 
 export const config = {
-  matcher: ["/create-event", "/joined-events", "/profile"],
+  matcher: ["/create-event", "/joined-events", "/profile", "/manage-events"],
 };

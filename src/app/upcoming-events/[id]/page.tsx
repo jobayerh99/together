@@ -18,6 +18,9 @@ import { Separator } from "@/components/ui/separator";
 
 
 import JoinEventButton from "@/components/events/JoinEventButton";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { getTokenFromServer } from "@/lib/getTokenFromServer";
  
 export interface EventDetails {
     _id: string;
@@ -76,11 +79,16 @@ const EventDetailsPage = async ({
 
     let event: EventDetails;
 
+    const token = await getTokenFromServer()
+
     try {
         const response = await fetch(
             `${API_URL}/upcoming-event/${id}`,
             {
                 cache: "no-store",
+                headers : {
+                    authorization: `Bearer ${token}`,
+                }
             }
         );
 

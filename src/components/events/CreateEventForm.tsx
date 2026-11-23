@@ -35,6 +35,8 @@ import {
 import { createEvent } from "@/services/events"
 
 import { EventImagePreview } from "./EventImagePreview"
+import { authClient } from "@/lib/auth-client"
+import { getTokenFromClient } from "@/lib/getTokenFromClient"
 
 const defaultValues: DefaultValues<CreateEventValues> = {
   title: "",
@@ -90,14 +92,10 @@ export function CreateEventForm() {
 
   const submit = handleSubmit(async (values) => {
     // Guard against duplicate submissions while a request is in flight.
-
-    console.log("Form Data:", values);
-
-    if (isSubmitting) return
-    
+    const token = await getTokenFromClient()
 
     try {
-      await createEvent(values)
+      await createEvent(values, token)
       toast.add({
         type: "success",
         title: "Your event has been created successfully!",
@@ -121,6 +119,7 @@ export function CreateEventForm() {
     event.preventDefault()
     if (isSubmitting) return
     void submit(event)
+    router.refresh();
   }
 
   return (

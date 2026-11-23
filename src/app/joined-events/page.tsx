@@ -21,6 +21,7 @@ import { buttonVariants } from "@/components/ui/button";
 import JoinedEventCard, {
     type JoinedEvent,
 } from "@/components/events/JoinedEventCard";
+import { getTokenFromServer } from "@/lib/getTokenFromServer";
 
 export const metadata: Metadata = {
     title: "My Joined Events | Together",
@@ -148,10 +149,15 @@ async function JoinedEventsSection() {
     let currentTime = 0;
 
     try {
+        const token = await getTokenFromServer()
+
         const res = await fetch(
             `${API_URL}/joined-events/${encodeURIComponent(user.email)}`,
             {
                 cache: "no-store",
+                headers : {
+                    authorization: `Bearer ${token}`
+                }
             }
         );
 

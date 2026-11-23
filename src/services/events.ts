@@ -5,8 +5,9 @@ import type { CreateEventValues } from "@/lib/event-schema"
 import { headers } from "next/headers"
 import { EventRecord, EVENTS_API_BASE, EventsApiError, toIsoDate } from "./events.types"
 
-export async function createEvent(
-  payload: CreateEventValues
+export async function createEvent( 
+  payload: CreateEventValues,
+  token: string
 ): Promise<{ success: boolean; message?: string; data?: unknown }> {
   const reqHeaders = await headers()
 
@@ -35,7 +36,7 @@ export async function createEvent(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        cookie: reqHeaders.get("cookie") ?? "",
+        authorization: `Bearer ${token}`
       },
       body: JSON.stringify(body),
     })
