@@ -1,68 +1,27 @@
+"use server"
 
+import { auth } from "@/lib/auth"
 import type { CreateEventValues } from "@/lib/event-schema"
+import { headers } from "next/headers"
+import { EventRecord, EVENTS_API_BASE, EventsApiError, toIsoDate } from "./events.types"
 
+export async function createEvent(
+  payload: CreateEventValues
+): Promise<{ success: boolean; message?: string; data?: unknown }> {
+  const reqHeaders = await headers()
 
-/**
- * Events API service — the single place where backend URLs, request payloads,
- * and response shapes are mapped for the frontend.
- *
- * The Express backend runs locally for development; adjust
- * {@link EVENTS_API_BASE} when it is deployed. API authentication and
- * authorization (JWT) are handled by the backend, not by this service.
- */
-
-/** Base URL of the Express backend. */
-const EVENTS_API_BASE = "http://localhost:8000"
-
-/** Error thrown for network, HTTP, and malformed-response failures. */
-export class EventsApiError extends Error {
-  constructor(message: string, readonly status?: number) {
-    super(message)
-    this.name = "EventsApiError"
+  const session = await auth.api.getSession({ headers: reqHeaders })
+  const user = session?.user
+  if (!user) {
+    return { success: false, message: "You must be logged in to create an event." }
   }
-}
-
-/**
- * Normalized event record as rendered by the UI.
- *
- * The backend returns Mongo's `_id`; `id` is assigned during normalization so
- * consumers never deal with two id shapes.
- */
-export interface EventRecord {
-  id: string
-  title: string
-  description: string
-  eventType: string
-  thumbnailUrl: string
-  location: string
-  /** ISO timestamp of the event date (MongoDB Date on the backend). */
-  eventDate: string
-}
-
-/**
- * Converts the `YYYY-MM-DD` date-input value into an ISO timestamp the backend
- * can store as a MongoDB Date (local midnight of the chosen day).
- */
-function toIsoDate(value: string): string {
-  const [year = "0", month = "1", day = "1"] = value.split("-")
-  return new Date(Number(year), Number(month) - 1, Number(day)).toISOString()
-}
-
-/**
- * Creates an event on the backend.
- *
- * Payload: `title`, `description`, `eventType`, `thumbnailUrl`, `location`,
- * `eventDate`. Throws {@link EventsApiError} with a human-readable message on
- * failure — callers must never treat a failure as a success.
- */
-
-
-
-export async function createEvent(payload: CreateEventValues): Promise<unknown> {
-
-  
 
   const body = {
+    userId: user.id,
+    userName: user.name,
+    userEmail: user.email,
+    userImage: user.image,
+    title: payload.title,
     description: payload.description,
     eventType: payload.eventType,
     thumbnailUrl: payload.thumbnailUrl,
@@ -74,12 +33,17 @@ export async function createEvent(payload: CreateEventValues): Promise<unknown> 
   try {
     response = await fetch(`${EVENTS_API_BASE}/create-event`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        cookie: reqHeaders.get("cookie") ?? "",
+      },
       body: JSON.stringify(body),
-      // Forward session cookies so the backend can authorize the request (JWT later).
     })
   } catch {
-    throw new EventsApiError("Unable to reach the event API. Check your connection and try again.")
+    return {
+      success: false,
+      message: "Unable to reach the event API. Check your connection and try again.",
+    }
   }
 
   if (!response.ok) {
@@ -92,10 +56,10 @@ export async function createEvent(payload: CreateEventValues): Promise<unknown> 
         : typeof data?.message === "string"
           ? data.message
           : `The server rejected the request (HTTP ${response.status}).`
-    throw new EventsApiError(message, response.status)
+    return { success: false, message }
   }
 
-  return response.json().catch(() => null)
+  return { success: true, data: await response.json().catch(() => null) }
 }
 
 /**

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { getUpcomingEvents } from "@/services/events"
 
+
 export const metadata: Metadata = {
   title: "Upcoming Events | Together",
   description:
