@@ -1,5 +1,6 @@
 import { EventCard } from "@/components/events/EventCard"
-import type { EventRecord } from "@/services/events"
+import { EventRecord } from "@/services/events.types"
+
 
 /**
  * Shared responsive event grid: 1 column on mobile, 2 on tablet, 3 on desktop,

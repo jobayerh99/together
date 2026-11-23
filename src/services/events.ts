@@ -3,7 +3,7 @@
 import { auth } from "@/lib/auth"
 import type { CreateEventValues } from "@/lib/event-schema"
 import { headers } from "next/headers"
-import { EventRecord, EventsApiError, toIsoDate } from "./events.types"
+import  { type EventRecord, EventsApiError, toIsoDate } from "./events.types"
 
 export async function createEvent( 
   payload: CreateEventValues,

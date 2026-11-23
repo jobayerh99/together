@@ -10,7 +10,8 @@ import {
   type EventSort,
 } from "@/components/events/EventFilters"
 import { EventGrid } from "@/components/events/EventGrid"
-import type { EventRecord } from "@/services/events"
+import { EventRecord } from "@/services/events.types"
+
 
 /** Case-insensitive match against the event title or location. */
 function matchesQuery(event: EventRecord, query: string): boolean {
