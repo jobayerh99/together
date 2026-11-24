@@ -45,7 +45,7 @@ const features = [
         title: "Manage Your Activities",
         description:
             "Keep your joined events organized, revisit event details, and stay connected with your community activities.",
-        link: "/joined-event",
+        link: "/joined-events",
         linkText: "View My Events",
     },
 ];
@@ -139,7 +139,7 @@ const FeatureSection = () => {
                 </div>
 
                 {/* Bottom Message */}
-                <div className="mt-12 rounded-2xl border border-primary/15 bg-primary/5 px-6 py-8 text-center sm:mt-16 sm:px-10">
+                {/* <div className="mt-12 rounded-2xl border border-primary/15 bg-primary/5 px-6 py-8 text-center sm:mt-16 sm:px-10">
 
                     <h3 className="text-xl font-bold text-foreground sm:text-2xl">
                         Small Actions. Big Impact.
@@ -159,7 +159,7 @@ const FeatureSection = () => {
                         <ArrowUpRight className="size-4" />
                     </Link>
 
-                </div>
+                </div> */}
 
             </div>
         </section>

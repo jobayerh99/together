@@ -1,10 +1,11 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { EventDetails } from "@/app/upcoming-events/[id]/page";
 import { authClient } from "@/lib/auth-client";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 import { Button } from "../ui/button";
 import { toast } from "@/components/ui/toast";
@@ -48,10 +49,16 @@ const JoinEventButton = ({
             try {
                 setIsChecking(true);
 
+                // The joined-events endpoint requires the verified JWT.
+                const token = await getTokenFromClient();
+
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/joined-events/${user.email}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/joined-events/${encodeURIComponent(user.email)}`,
                     {
                         cache: "no-store",
+                        headers: token
+                            ? { authorization: `Bearer ${token}` }
+                            : undefined,
                     }
                 );
 
@@ -91,37 +98,44 @@ const JoinEventButton = ({
     }, [user?.email, event._id, isPending]);
 
 
-    // Existing joining function - unchanged.
-    const handleJoining = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
+    // Join the event using the verified JWT — identity comes from the server.
+    const handleJoining = async (): Promise<"joined" | "already-joined"> => {
+        const token = await getTokenFromClient();
 
-        const { _id: eventId, ...eventDetails } = event;
-
-        const data = {
-            ...user,
-            ...eventDetails,
-            eventId,
-            joiningDate: new Date()
-        };
+        if (!token) {
+            throw new Error("Your session has expired. Please log in again.");
+        }
 
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joined`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                authorization: `Bearer ${token}`
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({ eventId: event._id })
         });
 
-        const joinedData = await res.json();
+        // Duplicate registration (unique index or pre-check on the server).
+        if (res.status === 409) {
+            return "already-joined";
+        }
 
-        console.log(joinedData);
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            throw new Error(
+                (data && typeof data.message === "string" && data.message) ||
+                (data && typeof data.msg === "string" && data.msg) ||
+                "Failed to join event. Please try again."
+            );
+        }
+
+        return "joined";
     };
 
 
     // Handle button click and toast.
-    const handleJoinClick = async (
-        e: React.MouseEvent<HTMLButtonElement>
-    ) => {
+    const handleJoinClick = async () => {
 
         if (isJoined || isSubmitting || isChecking) return;
 
@@ -131,7 +145,10 @@ const JoinEventButton = ({
                 title: "Please Login",
                 description: "You need to log in before joining an event.",
             });
-            router.push("/login");
+            // Preserve the intended destination so login returns here.
+            router.push(
+                `/login?redirect=${encodeURIComponent(`/upcoming-events/${event._id}`)}`
+            );
 
             return;
         }
@@ -139,15 +156,23 @@ const JoinEventButton = ({
         setIsSubmitting(true);
 
         try {
-            await handleJoining(e);
+            const result = await handleJoining();
 
             setIsJoined(true);
 
-            toast.add({
-                type: "success",
-                title: "Successfully Joined!",
-                description: "You are now a participant in this event.",
-            });
+            if (result === "already-joined") {
+                toast.add({
+                    type: "info",
+                    title: "Already Joined",
+                    description: "You are already a participant in this event.",
+                });
+            } else {
+                toast.add({
+                    type: "success",
+                    title: "Successfully Joined!",
+                    description: "You are now a participant in this event.",
+                });
+            }
 
         } catch (error) {
             console.error("Failed to join event:", error);
@@ -155,7 +180,10 @@ const JoinEventButton = ({
             toast.add({
                 type: "error",
                 title: "Unable to Join Event",
-                description: "Something went wrong. Please try again.",
+                description:
+                    error instanceof Error && error.message
+                        ? error.message
+                        : "Something went wrong. Please try again.",
             });
 
         } finally {

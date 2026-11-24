@@ -10,7 +10,9 @@ import { type NavbarUser } from "./nav-items"
 import { ThemeToggle } from "./theme-toggle"
 import { UserMenu } from "./user-menu"
 import { buttonVariants } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast"
 import { authClient } from "@/lib/auth-client"
+import { useRouter } from "next/navigation"
 
 interface NavbarProps {
   /** Pass the authenticated user (mapped to NavbarUser) once auth exists. */
@@ -57,9 +59,28 @@ export function Navbar() {
 
   const {data: session} = authClient.useSession()
   const user = session?.user
+  const router = useRouter()
 
-  const onLogout = () => {
-    authClient.signOut()
+  const onLogout = async () => {
+    try {
+      await authClient.signOut()
+      toast.add({
+        type: "success",
+        title: "Logged out",
+        description: "You have been signed out successfully.",
+      })
+      router.push("/")
+      router.refresh()
+    } catch (error) {
+      toast.add({
+        type: "error",
+        title: "Logout failed",
+        description:
+          error instanceof Error && error.message
+            ? error.message
+            : "Please try again.",
+      })
+    }
   }
 
   const pathname = usePathname()

@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/toast";
 
@@ -21,16 +21,31 @@ import {
     FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+/** Only allow same-site paths so `?redirect=` can never leave the app. */
+const getSafeRedirect = () => {
+    const redirect = new URLSearchParams(window.location.search).get("redirect");
+    return redirect && redirect.startsWith("/") && !redirect.startsWith("//")
+        ? redirect
+        : "/";
+};
+
 export default function LoginPage() {
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+
     // Form submission
     const handleLogin = async (
-        e: React.SubmitEvent<HTMLFormElement>
+        e: React.FormEvent<HTMLFormElement>
     ) => {
         e.preventDefault();
+
+        if (isSubmitting) return;
 
         const formData = new FormData(e.currentTarget);
 
@@ -39,25 +54,73 @@ export default function LoginPage() {
             password: string;
         };
 
-        const { data, error } = await authClient.signIn.email({
-            ...user,
-        });
+        setIsSubmitting(true);
 
-        if (data) {
-            redirect("/");
-        }
+        try {
+            const { data, error } = await authClient.signIn.email({
+                ...user,
+            });
 
-        if (error) {
-            console.log(error);
+            if (error) {
+                toast.add({
+                    type: "error",
+                    title: "Unable to sign in",
+                    description:
+                        error.message || "Please check your email and password.",
+                });
+                return;
+            }
+
+            if (data) {
+                toast.add({
+                    type: "success",
+                    title: "Welcome back!",
+                    description: "You have signed in successfully.",
+                });
+                router.push(getSafeRedirect());
+                router.refresh();
+            }
+        } catch {
+            toast.add({
+                type: "error",
+                title: "Unable to sign in",
+                description: "Something went wrong. Please try again.",
+            });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleGoogleSignIn = async () => {
-        const data = await authClient.signIn.social({
-            provider: "google",
-        });
-        console.log(data);
-    }
+        if (isGoogleSubmitting) return;
+
+        setIsGoogleSubmitting(true);
+
+        try {
+            const { error } = await authClient.signIn.social({
+                provider: "google",
+                callbackURL: getSafeRedirect(),
+            });
+
+            if (error) {
+                toast.add({
+                    type: "error",
+                    title: "Google sign-in failed",
+                    description:
+                        error.message || "Please try again in a moment.",
+                });
+            }
+            // On success the client auto-redirects to Google and back.
+        } catch {
+            toast.add({
+                type: "error",
+                title: "Google sign-in failed",
+                description: "Something went wrong. Please try again.",
+            });
+        } finally {
+            setIsGoogleSubmitting(false);
+        }
+    };
 
     return (
         <div className={cn("mx-auto flex w-full max-w-xl flex-col gap-6")}>
@@ -147,9 +210,11 @@ export default function LoginPage() {
                             <Field className="gap-4 pt-2">
                                 <Button
                                     type="submit"
+                                    disabled={isSubmitting}
                                     className="h-11 w-full rounded-lg bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/15 transition-all hover:bg-primary/90 hover:shadow-lg"
                                 >
-                                    Log In
+                                    {isSubmitting && <Spinner />}
+                                    {isSubmitting ? "Logging In..." : "Log In"}
                                 </Button>
 
                                 <FieldDescription className="text-center text-sm">
@@ -174,6 +239,7 @@ export default function LoginPage() {
                                 onClick={handleGoogleSignIn}
                                     variant="outline"
                                     type="button"
+                                    disabled={isGoogleSubmitting || isSubmitting}
                                     className="h-11 w-full rounded-lg border-border bg-background font-semibold transition-all hover:border-primary/40 hover:bg-primary/[0.04]"
                                 >
                                     <svg
@@ -188,7 +254,10 @@ export default function LoginPage() {
                                         />
                                     </svg>
 
-                                    Login with Google
+                                    {isGoogleSubmitting && <Spinner />}
+                                    {isGoogleSubmitting
+                                        ? "Redirecting..."
+                                        : "Login with Google"}
                                 </Button>
                             </Field>
                         </FieldGroup>

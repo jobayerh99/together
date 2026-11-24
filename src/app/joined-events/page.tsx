@@ -139,7 +139,7 @@ async function JoinedEventsSection() {
 
     // 2. Redirect if user is not logged in.
     if (!user?.email) {
-        redirect("/login");
+        redirect("/login?callbackURL=%2Fjoined-event");
     }
 
     // 3. Fetch joined events.
@@ -154,9 +154,9 @@ async function JoinedEventsSection() {
             `${process.env.NEXT_PUBLIC_API_URL}/joined-events/${encodeURIComponent(user.email)}`,
             {
                 cache: "no-store",
-                headers : {
-                    authorization: `Bearer ${token}`
-                }
+                headers: token
+                    ? { authorization: `Bearer ${token}` }
+                    : undefined,
             }
         );
 

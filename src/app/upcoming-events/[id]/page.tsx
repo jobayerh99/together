@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -18,10 +19,7 @@ import { Separator } from "@/components/ui/separator";
 
 
 import JoinEventButton from "@/components/events/JoinEventButton";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { getTokenFromServer } from "@/lib/getTokenFromServer";
- 
+
 export interface EventDetails {
     _id: string;
     title: string;
@@ -30,6 +28,8 @@ export interface EventDetails {
     thumbnailUrl: string;
     location: string;
     eventDate: string;
+    userName: string;
+    userImage: string;
 }
 
 interface EventDetailsPageProps {
@@ -78,17 +78,15 @@ const EventDetailsPage = async ({
 
     let event: EventDetails;
 
-    const token = await getTokenFromServer()
-
+    // Event details are public — no auth token required (spec §14).
     try {
+        if (!process.env.NEXT_PUBLIC_API_URL) {
+            throw new Error("NEXT_PUBLIC_API_URL is not configured.");
+        }
+
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/upcoming-event/${id}`,
-            {
-                cache: "no-store",
-                headers : {
-                    authorization: `Bearer ${token}`,
-                }
-            }
+            { cache: "no-store" }
         );
 
         if (response.status === 404) {
@@ -232,11 +230,27 @@ const EventDetailsPage = async ({
                                         Be Part of the Change
                                     </h2>
 
-                                    <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                                        Every small action can create a meaningful impact.
-                                        Join Together and become part of a community that
-                                        cares, supports, and makes a difference.
-                                    </p>
+                                    {/* Event Organizer */}
+                                    <div className="mt-4 flex items-center gap-3">
+                                        <Image
+                                            src={event.userImage}
+                                            alt={event.userName}
+                                            width={48}
+                                            height={48}
+                                            unoptimized
+                                            className="size-12 rounded-full border-2 border-primary/20 object-cover"
+                                        />
+
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">
+                                                Organized by
+                                            </p>
+
+                                            <p className="text-base font-semibold text-foreground">
+                                                {event.userName}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

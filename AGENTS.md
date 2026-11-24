@@ -8,35 +8,49 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# AGENTS.md — Social Development Events Platform (ShomajBondhu)
+# AGENTS.md — "Together" (Social Development Events Platform)
 
-The binding assignment spec lives in `docs/ASSIGNMENT.md` (design system, routes, auth/JWT rules, DB schema, API surface, commit/README/deployment requirements). It is loaded every session via `opencode.json` → `instructions`. On conflict, the spec wins.
+`docs/ASSIGNMENT.md` is the binding assignment spec (design system, routes, auth rules, DB/API requirements, commit rules). It is loaded every session via `opencode.json` → `instructions`; don't duplicate it here. On conflict, the spec wins — except where it describes code that doesn't exist (e.g. the `/api/events/...` endpoints in spec §19 never got built; see Data layer).
 
-## Commands (npm repo — don't introduce other lockfiles)
+## Commands
 
-- `npm run dev` — dev server; Turbopack is the default bundler in Next 16.
-- `npm run lint` — ESLint flat config (`eslint.config.mjs`).
-- `npx tsc --noEmit` — typecheck; there is no `typecheck` script.
-- `npm run build` — production build.
-- No test runner and no CI exist. Verify in this order: `npm run lint` → `npx tsc --noEmit` → `npm run build`.
+- `npm run dev` — dev server (Turbopack). Verify in this order: `npm run lint` → `npx tsc --noEmit` → `npm run build`. There is no `typecheck` script, no test runner, no CI, no pre-commit hooks; `build` also typechecks.
+- Baseline at last verification (don't assume you caused these): lint exits 1 with 2 pre-existing `react-hooks/set-state-in-effect` errors in `src/components/ui/carousel.tsx` and `src/hooks/use-mobile.ts`, plus ~9 unused-import warnings. tsc and build pass.
+- `.env` is gitignored and there is no `.env.example` — a fresh clone has no env at all, and every backend fetch then hits `undefined/...`. Required keys: `NEXT_PUBLIC_API_URL` (Express backend, e.g. `http://localhost:8000`), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `MONGODB_URI` (this app's own Better Auth connects to Mongo directly from `src/lib/auth.ts`), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
-## Repo shape
+## Architecture you can't infer from filenames
 
-- Single package, App Router under `src/`; alias `@/*` → `./src/*` (tsconfig).
-- Still a scaffold: `src/app/page.tsx` is empty, `src/components/ui/` is the shadcn kit, plus `src/lib/` and `src/hooks/`. No backend, auth, database, or `.env*` files yet — the Express/Better Auth/MongoDB side is unbuilt work from the spec.
+- This repo is frontend only. The Express/MongoDB backend is a **separate git repo**: `C:\projects\together-server` (plain ESM JS — `"type": "module"` — run `node index.js`, port 8000, database `together`, collections `event` and `joined`; the same DB holds Better Auth's user collections). Event pages fail without it running.
+- Every backend call reads `process.env.NEXT_PUBLIC_API_URL` (single source of truth, in `.env`); there are no hardcoded hosts left in `src/`.
+- Auth is Better Auth (`src/lib/auth.ts`: MongoDB adapter, `jwt()` plugin, Google OAuth + email/password; client in `src/lib/auth-client.ts`). Prefer `authClient` — it has the baseURL and `jwtClient`; the extra bare `createAuthClient()` export on line 11 is unused legacy.
+- Authenticated backend calls send `Authorization: Bearer <jwt>` from `getTokenFromServer()` (server) or `getTokenFromClient()` (client). together-server builds its JWKS URL as `` `${CLIENT_URL}pr/api/auth/jwks` `` — with the current `.env` (`CLIENT_URL=http://localhost:3000`, no trailing slash) `new URL()` throws, so every JWT-checked endpoint errors out. The real endpoint this app serves is `GET /api/auth/jwks`. First suspect when create/update/joined-detail requests return 401/500.
+- Route protection is `src/proxy.ts` — Next 16 renamed `middleware` → `proxy`. Matcher: `/create-event`, `/joined-events`, `/profile`, `/manage-events`.
+- Dead code: `src/lib/session.ts` (`parseSessionCookie`, `isAuthRequired`, `REQUIRE_AUTH`) is a pre-Better-Auth seam nothing imports — don't build on it.
 
-## Toolchain gotchas
+## Next 16 specifics (bundled docs: `node_modules/next/dist/docs/`)
 
-- **Next.js 16.4.6 + React 19.3** — bundled docs in `node_modules/next/dist/docs/` differ from older Next; check them before writing code. Layouts use the generated `LayoutProps<"/route">` type (see `src/app/layout.tsx`).
-- **React Compiler enabled** (`reactCompiler: true` in `next.config.ts`) — manual `memo`/`useMemo`/`useCallback` is unnecessary.
-- **`cacheComponents: true`** (+ `partialPrefetching`) — data fetching follows the Next 16 cache model; don't copy pre-16 `revalidate`/`dynamic` idioms without checking the bundled docs.
-- **Tailwind v4 is CSS-first** — no `tailwind.config`; theme tokens live in `src/app/globals.css` (`@theme inline` + oklch variables). CSS goes through the `@tailwindcss/turbopack` loader rule in `next.config.ts`.
-- **shadcn style is `base-nova`** (`components.json`) — components wrap `@base-ui/react`, **not Radix**; most online shadcn examples won't match. `cn` is the npm package `cn` (ui components import it directly; `src/lib/utils.ts` re-exports it). Add components with `npx shadcn add <component>` (CLI is a dependency).
-- **Fonts are half-wired** — `layout.tsx` loads Inter (spec also requires Hind Siliguri, not loaded yet). `globals.css` maps `--font-sans`/`--font-mono` to `var(--font-sans)`/`var(--font-geist-mono)`, which nothing defines since the Geist `variable:` prop was removed from the layout; body text works only via Inter's class on `<html>`, while `font-mono`/`font-heading` don't resolve to a real family.
+- `cacheComponents: true` (+ `partialPrefetching`): request-time data must sit inside a `<Suspense>` (see `upcoming-events/page.tsx`), or the page opts into blocking with `export const instant = false` (`create-event`, `profile`).
+- Layouts use the generated `LayoutProps<"/route">` type.
+- React Compiler is on — no manual `memo`/`useMemo`/`useCallback`.
+
+## UI conventions
+
+- Tailwind v4 is CSS-first: no `tailwind.config`; tokens live in `src/app/globals.css` (`@theme inline` + light/dark semantic vars).
+- shadcn style is `base-nova`: components wrap `@base-ui/react`, **not Radix** (most online shadcn examples won't match). `cn` is the npm package `cn` (import directly; `src/lib/utils.ts` re-exports it). Add components with `npx shadcn add <component>`.
+- Toasts use `src/components/ui/toast` (Base UI, mounted in `providers.tsx`) — the assignment mentions Sonner, but don't add it; never use `alert()`.
+- Fonts: only Inter is loaded (`layout.tsx`); `globals.css` maps `--font-sans` to itself and `--font-mono` to `--font-geist-mono` (defined nowhere), so `font-sans`/`font-mono`/`font-heading` utilities resolve to no real family — body text works only via Inter's class on `<html>`. Hind Siliguri (spec) is not loaded.
+
+## Data layer
+
+- Server components/actions call the backend directly (`src/services/events.ts`, `"use server"`); responses are normalized there — accepts a bare array or `{events}`/`{data}` envelope, drops invalid rows, and filters/re-sorts client-side because the backend guarantees neither (`GET /upcoming-events` is a bare `find().toArray()`).
+- Actual backend routes (no `/api` prefix, irregular names — copy from existing call sites, don't guess): `POST /create-event`, `GET /upcoming-events`, `GET /upcoming-event/:id`, `POST /joined`, `GET /joined-events/:email`, `DELETE /joinedevents/:id`, `GET /manage-events/:email`, `PATCH|DELETE /event/:id`. Note `POST /joined` and `DELETE /joinedevents/:id` currently skip JWT verification.
+- `EventRecord` is exported from `@/services/events.types`; `@/services/events` imports it but does not re-export it.
+- Shared Zod schema + category list: `src/lib/event-schema.ts` (used by CreateEventForm and EventFilters; the manage-events edit dialog is hand-rolled `useState` validation, not Zod).
+- Event details live at `/upcoming-events/[id]` (the assignment's `/events/[id]` was implemented here — don't create a second route).
 
 ## Managed `nextjs-agent-rules` block
 
-- Never edit or insert text between the `BEGIN:nextjs-agent-rules` / `END:nextjs-agent-rules` comment markers at the top of this file. `next dev` rewrites that region wholesale (`upsertAgentRulesBlock` in `node_modules/next/dist/server/lib/generate-agent-files.js`) and deletes anything else stored there. Custom content always goes after the `END` marker.
+- Never edit or insert text between the `BEGIN:nextjs-agent-rules` / `END:nextjs-agent-rules` markers at the top of this file. `next dev` rewrites that region wholesale (`upsertAgentRulesBlock` in `node_modules/next/dist/server/lib/generate-agent-files.js`) and deletes anything else stored there. Custom content always goes after the `END` marker.
 - With `experimental.agentFeedback: true`, `next dev` may also append an agent-feedback block to this file — keep it rather than stripping it.
 - Confirm the block is intact:
   `node -e "console.log(require('next/dist/server/lib/generate-agent-files.js').hasCurrentAgentRules(process.cwd()))"` → must print `true`.

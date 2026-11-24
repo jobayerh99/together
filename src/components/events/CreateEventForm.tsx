@@ -92,10 +92,30 @@ export function CreateEventForm() {
 
   const submit = handleSubmit(async (values) => {
     // Guard against duplicate submissions while a request is in flight.
-    const token = await getTokenFromClient()
-
     try {
-      await createEvent(values, token)
+      const token = await getTokenFromClient()
+
+      if (!token) {
+        toast.add({
+          type: "error",
+          title: "Your session has expired",
+          description: "Please log in again to create an event.",
+        })
+        return
+      }
+
+      const result = await createEvent(values, token)
+
+      if (!result.success) {
+        // Form data stays intact so the visitor can review and retry.
+        toast.add({
+          type: "error",
+          title: "Something went wrong while creating your event.",
+          description: result.message || "Please try again in a moment.",
+        })
+        return
+      }
+
       toast.add({
         type: "success",
         title: "Your event has been created successfully!",
@@ -119,7 +139,6 @@ export function CreateEventForm() {
     event.preventDefault()
     if (isSubmitting) return
     void submit(event)
-    router.refresh();
   }
 
   return (

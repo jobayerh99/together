@@ -23,6 +23,7 @@ import {
 
 import type { IManageEvent } from "./ManageEventCard";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
+import { toast } from "@/components/ui/toast";
 
 
 // Only the fields that users are allowed to edit
@@ -147,6 +148,10 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
 
             const token = await getTokenFromClient()
 
+            if (!token) {
+                throw new Error("Your session has expired. Please log in again.");
+            }
+
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/event/${event._id}`,
                 {
@@ -163,12 +168,18 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
 
             if (!res.ok) {
                 throw new Error(
-                    data?.message || "Failed to update event."
+                    data?.message || data?.msg || "Failed to update event."
                 );
             }
 
             // Close dialog after successful update
             setEditOpen(false);
+
+            toast.add({
+                type: "success",
+                title: "Event updated",
+                description: "Your changes have been saved successfully.",
+            });
 
             // Refresh Server Component data
             router.refresh();
@@ -176,11 +187,18 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
         } catch (error) {
             console.error("Update event error:", error);
 
-            setUpdateError(
-                error instanceof Error
+            const message =
+                error instanceof Error && error.message
                     ? error.message
-                    : "Something went wrong."
-            );
+                    : "Something went wrong.";
+
+            setUpdateError(message);
+
+            toast.add({
+                type: "error",
+                title: "Unable to update event",
+                description: message,
+            });
         } finally {
             setIsUpdating(false);
         }
@@ -197,6 +215,10 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
 
             const token = await getTokenFromClient()
 
+            if (!token) {
+                throw new Error("Your session has expired. Please log in again.");
+            }
+
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/event/${event._id}`,
                 {
@@ -207,14 +229,22 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
                 }
             );
 
-            const data = await res.json();
+            const data = await res.json().catch(() => null);
 
             if (!res.ok) {
-                throw new Error(data.message || "Failed to delete event");
+                throw new Error(
+                    data?.message || data?.msg || "Failed to delete event"
+                );
             }
 
             // Close confirmation dialog
             setDeleteOpen(false);
+
+            toast.add({
+                type: "success",
+                title: "Event deleted",
+                description: "Your event has been removed permanently.",
+            });
 
             // Refresh updated event list
             router.refresh();
@@ -222,11 +252,18 @@ const ManageEventActions = ({ event }: { event: IManageEvent }) => {
         } catch (error) {
             console.error("Delete error:", error);
 
-            setDeleteError(
-                error instanceof Error
+            const message =
+                error instanceof Error && error.message
                     ? error.message
-                    : "Something went wrong"
-            );
+                    : "Something went wrong";
+
+            setDeleteError(message);
+
+            toast.add({
+                type: "error",
+                title: "Unable to delete event",
+                description: message,
+            });
         } finally {
             setIsDeleting(false);
         }

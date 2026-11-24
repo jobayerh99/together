@@ -15,6 +15,7 @@ import Link from "next/link";
 import ManageEventCard, {
     IManageEvent,
 } from "@/components/events/ManageEventCard";
+import { getTokenFromServer } from "@/lib/getTokenFromServer";
 
 
 // Dynamic content: authentication and API fetching
@@ -46,11 +47,16 @@ const ManageEventsContent = async () => {
 
     
 
-    // Fetch user's events
+    // Fetch user's events (endpoint requires the verified JWT)
+    const token = await getTokenFromServer()
+
     const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/manage-events/${encodeURIComponent(user.email)}`,
         {
             cache: "no-store",
+            headers: token
+                ? { authorization: `Bearer ${token}` }
+                : undefined,
         }
     );
 

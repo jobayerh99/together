@@ -128,7 +128,7 @@ const GallerySection = () => {
                 </div>
 
                 {/* Bottom Message */}
-                <div className="mt-12 rounded-2xl border border-primary/15 bg-primary/5 px-6 py-8 text-center sm:mt-16 sm:px-10">
+                {/* <div className="mt-12 rounded-2xl border border-primary/15 bg-primary/5 px-6 py-8 text-center sm:mt-16 sm:px-10">
 
                     <div className="mb-3 flex justify-center">
                         <Heart className="size-8 fill-primary/10 text-primary" />
@@ -152,7 +152,7 @@ const GallerySection = () => {
                         <ArrowUpRight className="size-4" />
                     </Link>
 
-                </div>
+                </div> */}
 
             </div>
         </section>

@@ -16,7 +16,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { EventImage } from "@/components/events/EventImage";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/toast";
-import { redirect } from "next/navigation";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
+
 
 export interface JoinedEvent {
     _id?: string;
@@ -55,33 +56,58 @@ const JoinedEventCard = ({ event }: JoinedEventCardProps) => {
     const router = useRouter();
 
     const handleRemoveEvent = async () => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joinedevents/${event._id}`, {
-            method: 'DELETE'
-        })
-        const data = await res.json()
+        try {
+            const token = await getTokenFromClient()
 
-        // Check whether deletion was successful
-        if (
-            !res.ok ||
-            data?.success === false ||
-            data?.deletedCount === 0
-        ) {
-            throw new Error(
-                data?.message || "Failed to remove event"
+            if (!token) {
+                throw new Error("Your session has expired. Please log in again.");
+            }
+
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/joinedevents/${event._id}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                }
             );
+            const data = await res.json().catch(() => null);
+
+            // Check whether deletion was successful
+            if (
+                !res.ok ||
+                data?.success === false ||
+                data?.deletedCount === 0
+            ) {
+                throw new Error(
+                    data?.message || data?.msg || "Failed to remove event"
+                );
+            }
+
+            // Success toast
+            toast.add({
+                type: "success",
+                title: "Event Removed!",
+                description: "The event has been removed from your joined events.",
+            });
+
+            // Refresh after showing toast
+            setTimeout(() => {
+                router.refresh();
+            }, 1200);
+        } catch (error) {
+            console.error("Remove joined event error:", error);
+
+            toast.add({
+                type: "error",
+                title: "Unable to remove event",
+                description:
+                    error instanceof Error && error.message
+                        ? error.message
+                        : "Something went wrong. Please try again.",
+            });
         }
-
-        // Success toast
-        toast.add({
-            type: "success",
-            title: "Event Removed!",
-            description: "The event has been removed from your joined events.",
-        });
-
-        // Refresh after showing toast
-        setTimeout(() => {
-            router.refresh();
-        }, 1200);
     }
 
     useEffect(() => {
