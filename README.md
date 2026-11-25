@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Together – Community Service & Social Development Platform
 
-First, run the development server:
+**Together** is a community-driven platform that connects people who want to make a positive impact on society. It allows users to create, discover, and participate in social development events such as charity campaigns, winter clothing distribution, tree plantation, blood donation, and community cleanup activities.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Our mission is to bring people together and make social contributions easier, more organized, and more accessible.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌐 Live Website
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+[Visit Together](https://together-frontend-lime.vercel.app/)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ✨ Key Features
 
-## Learn More
+- **Discover Upcoming Events:** Explore upcoming community service and social development events.
+- **Create Events:** Organize social activities and share them with the community.
+- **Join Events:** Participate in meaningful initiatives and contribute to positive change.
+- **Event Details:** View event descriptions, locations, dates, and organizer information.
+- **Manage Your Events:** Edit, update, and delete events you have created.
+- **Track Joined Events:** Keep track of the events you have joined.
+- **Secure Authentication:** Sign in and create an account using email and password or Google authentication.
+- **Responsive Design:** Enjoy a smooth experience across desktop, tablet, and mobile devices.
+- **Community Engagement:** Connect with people who share a passion for helping others.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Technologies Used
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Frontend
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Lucide React
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Better Auth
 
-## Deploy on Vercel
+## 🎯 Project Goal
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Together aims to encourage community participation by making it easier for people to organize and join social development activities. Through collaboration and collective effort, we can build stronger communities and create a better future.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+**Together – Small Actions, Big Changes.**
